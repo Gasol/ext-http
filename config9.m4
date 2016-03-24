@@ -410,8 +410,13 @@ dnl ----
 			dnl end compile tests
 
 			AC_MSG_CHECKING([for default SSL CA info/path])
+			CURL_CA=
+			CURL_CONFIG_CA=$($CURL_CONFIG --ca)
+			if test -z "$CURL_CONFIG_CA"; then
+				CURL_CONFIG_CA=$($CURL_CONFIG --configure  | $EGREP -o -- "--with-ca@<:@^'@:>@*" | $SED 's/.*=//')
+			fi
 			for i in \
-				"$($CURL_CONFIG --ca)" \
+				"$CURL_CONFIG_CA" \
 				/etc/ssl/certs \
 				/etc/pki/tls/certs/ca-bundle.crt \
 				/etc/ssl/certs/ca-bundle.crt \
@@ -421,15 +426,22 @@ dnl ----
 			do
 				if test -d "$i"; then
 					# check if it's actually a hashed directory
-					if ls "$i"/[0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f].0 >/dev/null 2>&1; then
+					if ls "$i"/@<:@0-9a-f@:>@@<:@0-9a-f@:>@@<:@0-9a-f@:>@@<:@0-9a-f@:>@@<:@0-9a-f@:>@@<:@0-9a-f@:>@@<:@0-9a-f@:>@@<:@0-9a-f@:>@.0 >/dev/null 2>&1; then
+						CURL_CA="$i"
 						AC_MSG_RESULT([capath: $i])
 						AC_DEFINE_UNQUOTED([PHP_HTTP_CURL_CAPATH], ["$i"], [path to default SSL CA path])
+						break
 					fi
 				elif test -e "$i"; then
+					CURL_CA="$i"
 					AC_MSG_RESULT([cainfo: $i])
 					AC_DEFINE_UNQUOTED([PHP_HTTP_CURL_CAINFO], ["$i"], [path to default SSL CA info])
+					break
 				fi
 			done
+			if test -z "$CURL_CA"; then
+				AC_MSG_RESULT(none)
+			fi
 
 			PHP_ADD_INCLUDE($CURL_DIR/include)
 			PHP_ADD_LIBRARY_WITH_PATH(curl, $CURL_DIR/$PHP_LIBDIR, HTTP_SHARED_LIBADD)
