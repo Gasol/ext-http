@@ -419,8 +419,9 @@ dnl ----
 			for i in \
 				"$CURL_CONFIG_CA" \
 				/etc/ssl/certs \
-				/etc/pki/tls/certs/ca-bundle.crt \
 				/etc/ssl/certs/ca-bundle.crt \
+				/etc/ssl/certs/ca-certificates.crt \
+				/etc/pki/tls/certs/ca-bundle.crt \
 				/etc/pki/tls/certs/ca-bundle.trust.crt \
 				/etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem \
 				/System/Library/OpenSSL
@@ -435,7 +436,7 @@ dnl ----
 				fi
 			done
 			if test -n "$CURL_CA_PATH" && test -n "$CURL_CA_INFO"; then
-				AC_MSG_RESULT([info:$CURL_CA_INFO, path:$CURL_CA_PATH])
+				AC_MSG_RESULT([path:$CURL_CA_PATH, info:$CURL_CA_INFO])
 				AC_DEFINE_UNQUOTED([PHP_HTTP_CURL_CAPATH], ["$CURL_CA_PATH"], [path to default SSL CA path])
 				AC_DEFINE_UNQUOTED([PHP_HTTP_CURL_CAINFO], ["$CURL_CA_INFO"], [path to default SSL CA info])
 			elif test -n "$CURL_CA_INFO"; then
